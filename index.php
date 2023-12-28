@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ ."/login.php";
+require_once __DIR__ . "/login.php";
 
 //creare una sessione per il login
 if (!isset($_SESSION)) {
@@ -26,12 +26,25 @@ if ($connection && $connection->connect_error) {
 }
 
 // verificare se eseguire l'operazione di login 
-if (isset($_POST['username']) && isset($_POST['password'])){
+if (isset($_POST['username']) && isset($_POST['password'])) {
     login($_POST['username'], $_POST['password'], $connection);
 }
 
-$sql = "SELECT `id`, `nome_todo`, `status` FROM `todo_list`";
+
+//query di visualizzazione contenuto 
+$sql = "SELECT `id`, `nome_todo`, `status`, `user_id` FROM `todo_list`";
 $results = $connection->query($sql);
+
+//query di inserimento di un nuovo todo
+if (!empty($_POST['inputNewTodo'])) {
+    $new_todo = $_POST['inputNewTodo'];
+    $user_id = $_SESSION['user_id'];
+
+    $query = "INSERT INTO `todo_list` (`id`, `nome_todo`, `status`, `user_id`) VALUES (NULL, '$new_todo', '0', '$user_id')";
+    $connection->query($query);
+
+    header("Location: index.php?newTodo=success");
+}
 
 $connection->close();
 ?>
@@ -52,18 +65,21 @@ $connection->close();
 
 
 
-    <?php include_once __DIR__ ."/partials/header.php"?>
+        <?php include_once __DIR__ . "/partials/header.php" ?>
 
         <!-- verifica se l'utente è loggato => se user_id e username siano compilati -->
         <?php if (!empty($_SESSION['user_id']) && !empty($_SESSION['username'])) { ?>
 
             <?php if ($results && $results->num_rows > 0) { ?>
+
+                <h2 class="text-center p-5">TODO LIST</h2>
                 <table class="table">
                     <thead>
                         <tr>
                             <th scope="col">id</th>
                             <th scope="col">nome_todo</th>
                             <th scope="col">status</th>
+                            <th scope="col">user_id</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,10 +89,31 @@ $connection->close();
                                 <th scope="row"><?php echo $row['id'] ?></th>
                                 <td><?php echo $row['nome_todo'] ?></td>
                                 <td><?php echo $row['status'] ?></td>
+                                <td><?php echo $row['user_id'] ?></td>
                             </tr>
                         <?php } ?>
                     </tbody>
                 </table>
+
+                <h2 class="text-center p-5">NEW TODO</h2>
+
+                <div class="card w-50 mx-auto">
+                    <div class="card-body">
+
+                        <form class="row g-3" action="index.php" method="POST">
+                            <div class="col-md-12">
+                                <label for="inputNewTodo" class="form-label">Nome todo</label>
+                                <input type="text" class="form-control" id="inputNewTodo" name="inputNewTodo">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Sign in</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+
             <?php } ?>
 
         <?php } else { ?>

@@ -26,6 +26,8 @@ if (!empty($_POST['inputUsername']) && !empty($_POST['inputPassword'])) {
     if ($connection->query($sql) === FALSE) {
         echo "Errore nell'inserimento dei dati: " . $connection->error;
     }
+
+    header("Location: index.php?subscribe=success");
 } else {
     echo "campi vuoti";
 }
