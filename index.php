@@ -8,6 +8,7 @@ if (!isset($_SESSION)) {
 }
 
 
+
 // collegare il mysql
 define("DB_SERVER", "localhost:3306");
 define("DB_USERNAME", "root");
@@ -31,19 +32,33 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
 }
 
 
-//query di visualizzazione contenuto 
-$sql = "SELECT `id`, `nome_todo`, `status`, `user_id` FROM `todo_list`";
-$results = $connection->query($sql);
+//query di visualizzazione contenuto per privato per ogni user_id
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id` FROM `todo_list` WHERE `user_id` = '$user_id'";
+    $results = $connection->query($sql);
+}
 
 //query di inserimento di un nuovo todo
 if (!empty($_POST['inputNewTodo'])) {
     $new_todo = $_POST['inputNewTodo'];
-    $user_id = $_SESSION['user_id'];
+
 
     $query = "INSERT INTO `todo_list` (`id`, `nome_todo`, `status`, `user_id`) VALUES (NULL, '$new_todo', '0', '$user_id')";
     $connection->query($query);
 
     header("Location: index.php?newTodo=success");
+}
+
+
+//query per cancellare il todo
+if (isset($_POST['delete'])) {
+    $delete_id = $_POST['delete'];
+
+    $query_delete = "DELETE FROM todo_list WHERE `todo_list`.`id` = '$delete_id'";
+    $connection->query($query_delete);
+
+    header("Location: index.php?deleteTodo=success");
 }
 
 $connection->close();
@@ -80,6 +95,7 @@ $connection->close();
                             <th scope="col">nome_todo</th>
                             <th scope="col">status</th>
                             <th scope="col">user_id</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -90,6 +106,13 @@ $connection->close();
                                 <td><?php echo $row['nome_todo'] ?></td>
                                 <td><?php echo $row['status'] ?></td>
                                 <td><?php echo $row['user_id'] ?></td>
+
+                                <td>
+                                    <form action="index.php" method="POST">
+                                        <input type="hidden" type="text" value="<?php echo $row['id'] ?>" name="delete">
+                                        <button type="submit" class="btn btn-danger">DELETE</button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php } ?>
                     </tbody>
