@@ -50,27 +50,30 @@ $connection->close();
 <body>
     <div class="container mt-5">
 
-        <h2 class="text-center">Subscribe</h2>
+        <div class="row">
 
-        <div class="card w-50 mx-auto">
-            <div class="card-body">
+            <div class="col bg-light p-0">
+                <h2 class="text-left mb-5">Subscribe</h2>
 
-                <form class="row g-3" action="subscribe.php" method="POST">
-                    <div class="col-md-6">
-                        <label for="inputUsername" class="form-label">username</label>
-                        <input type="text" class="form-control" id="inputUsername" name="inputUsername">
+                <form action="subscribe.php" method="POST">
+
+                    <div class="mb-3 d-flex align-items-center  justify-content-center w-50 mx-auto  bg-white ">
+                        <label for="inputUsername" class="form-label p-2">username</label>
+                        <input type="text" class="form-control border-0  bg-white " id="inputUsername" name="inputUsername">
                     </div>
-                    <div class="col-md-6">
-                        <label for="inputPassword" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="inputPassword" name="inputPassword">
+
+                    <div class="mb-3 d-flex align-items-center  justify-content-center w-50 mx-auto bg-white ">
+                        <label for="inputPassword" class="form-label p-2">Password</label>
+                        <input type="password" class="form-control border-0  bg-white " id="inputPassword" name="inputPassword">
                     </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Sign in</button>
+
+                    <div class="d-flex align-items-center w-50 mx-auto gap-2">
+                        <button type="submit" class="btn btn-primary w-50 ">Sign in</button>
                     </div>
                 </form>
             </div>
-        </div>
-    </div>
+
+            <div class="col d-flex justify-content-start p-0"><img class="w-75" src="./img/twitterlists-TA.webp" alt=""></div>
 </body>
 
 </html>

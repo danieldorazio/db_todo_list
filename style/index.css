@@ -1,0 +1,48 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+img {
+    max-width: 100%;
+}
+
+.container {
+    width: 80%;
+    max-width: 1200px;
+    margin: auto;
+    background-color: aquamarine;
+
+}
+
+.bug {
+    background-color: blueviolet;
+}
+
+.d-flex {
+    display: flex;
+}
+
+
+
+
+.logo_login{
+    width: 50%;
+}
+
+.input_login {
+    padding: 5px;
+    background-color: white;
+    border: 1px solid black;
+}
+
+.input_login > label {
+    padding-left: 20px;
+}
+
+
