@@ -48,20 +48,19 @@ if (!empty($_GET['inputSearch'])) {
 }
 
 //query di visualizzazione contenuto per privato per ogni user_id al click del tasto all 
-if (isset($_GET['all']) && $_GET['all'] == 1 ) {
+if (isset($_GET['all']) && $_GET['all'] == 1) {
     $user_id = $_SESSION['user_id'];
     $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data` FROM `todo_list` WHERE `user_id` = '$user_id'";
     $results = $connection->query($sql);
 }
 
-//query di visualizzazione contenuto per privato per ogni user_id
-if (isset($_GET['toDay']) && $_GET['toDay'] == 1 ) {
+//query di visualizzazione contenuto per privato per ogni user_id del giorno odierno
+if (isset($_GET['toDay']) && $_GET['toDay'] == 1) {
     $user_id = $_SESSION['user_id'];
     $time_stamp = date('y-m-d');
     $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data` FROM `todo_list` WHERE `user_id` = '$user_id' AND `data` = '$time_stamp'";
     $results = $connection->query($sql);
 }
-
 
 
 //query di inserimento di un nuovo todo
@@ -85,6 +84,8 @@ if (isset($_POST['delete'])) {
     header("Location: index.php?deleteTodo=success");
 }
 
+
+
 $connection->close();
 ?>
 
@@ -96,7 +97,7 @@ $connection->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 </head>
 
@@ -106,76 +107,67 @@ $connection->close();
 
         <!-- verifica se l'utente è loggato => se user_id e username siano compilati -->
         <?php if (!empty($_SESSION['user_id']) && !empty($_SESSION['username'])) { ?>
-
             <?php if ($results && $results->num_rows > 0) { ?>
-
-
-
                 <div class="row">
-                    <div class="col">
-                        <div class="d-flex me-4">
-                            <span class="me-4">Ciao <?php echo $_SESSION['username']; ?></span>
+                    <div class="col bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="text-center p-5">Ciao <?php echo $_SESSION['username']; ?></h4>
 
                             <!-- BOTTONE DI LOGOUT -->
                             <form action="logout.php" method="POST">
                                 <input type="hidden" type="text" value="1" name="logout">
-                                <button type="submit" class="btn btn-danger">Logout</button>
+                                <button type="submit" class="btn btn-outline-secondary ">Logout</button>
                             </form>
                         </div>
-                        <form class="d-flex" action="index.php" method="GET">
-                            <label for="search">ricerca</label>
-                            <input type="text" class="form-control" id="inputSearch" name="inputSearch">
-                            <button type="submit" class="btn btn-primary">Sign in</button>
+
+                        <form class="d-flex border border-3 rounded-pill mb-5 " action="index.php" method="GET">
+                            <label for="search"></label>
+                            <input type="text" class="form-control border-0" id="inputSearch" name="inputSearch" placeholder="SEARCH TASK">
+                            <button type="submit" class="btn btn-outline-secondary border-0 "><i class="fa-solid fa-magnifying-glass"></i></button>
                         </form>
-                        <ul>
-                            <li>
+                        <ul class="list-group">
+                            <li class="list-group-item list-group-item-action border-0 ">
                                 <form action="index.php" method="GET">
                                     <input type="hidden" type="text" value="1" name="all">
-                                    <button type="submit" class="btn btn-danger">all</button>
+                                    <button type="submit" class="btn border-0 "><i class="fa-solid fa-house btn btn-outline-secondary border-0 "></i> <span class="ms-3">All Tasks</span></button>
                                 </form>
                             </li>
-                            <li>
+                            <li class="list-group-item list-group-item-action border-0">
                                 <form action="index.php" method="GET">
                                     <input type="hidden" type="text" value="1" name="toDay">
-                                    <button type="submit" class="btn btn-danger">To Day</button>
+                                    <button type="submit" class="btn border-0 "><i class="fa-regular fa-sun btn btn-outline-secondary border-0 "></i> <span class="ms-3">Today's Tasks</span></button>
                                 </form>
                             </li>
                         </ul>
+
                     </div>
 
-                    <div class="col">
-                        <h2 class="text-center p-5">TODO LIST</h2>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">nome_todo</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- ciclo while per mostare tutta la tabella  -->
+                    <div class="col bg-secondary">
+                        <h4 class="text-center p-5">TODO LIST</h4>
+                        <tbody>
+                            <!-- ciclo while per mostare tutta la tabella  -->
+                            <ul class="text-center  list-group">
                                 <?php while ($row = $results->fetch_assoc()) { ?>
-                                    <tr>
-                                        <td><?php echo $row['nome_todo'] ?></td>
-                                        <td><?php echo $row['data'] ?></td>
-                                        <td>
+
+                                    <li class="list-group-item list-group-item-action border-0"><?php echo $row['nome_todo'] ?></li>
+                                    <div class="d-flex">
+                                        <li class="list-group-item list-group-item-action border-0"><?php echo $row['data'] ?></li>
+                                        <li class="list-group-item list-group-item-action border-0">
                                             <form action="index.php" method="POST">
                                                 <input type="hidden" type="text" value="<?php echo $row['id'] ?>" name="delete">
-                                                <button type="submit" class="btn btn-danger">DELETE</button>
+                                                <button type="submit" class="btn btn-outline-danger border-0"><i class="fa-solid fa-trash"></i></button>
                                             </form>
-                                        </td>
-                                    </tr>
+                                        </li>
+                                    </div>
                                 <?php } ?>
-                            </tbody>
-                        </table>
+                            </ul>
                     </div>
 
-                    <div class="col">
-                        <h2 class="text-center p-5">NEW TODO</h2>
+                    <div class="col bg-light">
+                        <h4 class="text-center p-5">NEW TODO</h4>
 
-                        <div class="card w-50 mx-auto">
-                            <div class="card-body">
-
+                        <div class="card mx-auto">
+                            <div class="card-body text-center ">
                                 <form class="row g-3" action="index.php" method="POST">
                                     <div class="col-md-12">
                                         <label for="inputNewTodo" class="form-label">Nome todo</label>
@@ -183,29 +175,66 @@ $connection->close();
                                     </div>
                                     <div class="col-md-12">
                                         <label for="inputData" class="form-label">Data todo</label>
-                                        <input type="text" class="form-control" id="inputData" name="inputData">
+                                        <input type="text" class="form-control" id="inputData" name="inputData" placeholder="YY-MM-DD">
                                     </div>
                                     <div class="col-12">
-                                        <button type="submit" class="btn btn-primary">Sign in</button>
+                                        <button type="submit" class="btn btn-outline-success"><i class="fa-solid fa-paper-plane"></i></button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
+            <?php } else { ?>
+                <!-- eventualità result <= 0 -->
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="text-center p-3">Ciao <?php echo $_SESSION['username']; ?></h4>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- BOTTONE ALL TASKS -->
+                        <form action="index.php" method="GET" class="border rounded">
+                            <input type="hidden" type="text" value="1" name="all">
+                            <button type="submit" class="btn border-0 "><i class="fa-solid fa-house btn btn-outline-secondary border-0 "></i> <span class="ms-3">All Tasks</span></button>
+                        </form>
 
 
+                        <!-- BOTTONE DI LOGOUT -->
+                        <form action="logout.php" method="POST">
+                            <input type="hidden" type="text" value="1" name="logout">
+                            <button type="submit" class="btn btn-outline-secondary ">Logout</button>
+                        </form>
+                    </div>
+                </div>
 
 
+                <div class="card mx-auto">
+                    <div class="card-body text-center bg-light">
+                        <h4 class="text-center p-2 bg-danger text-white">ricerca impossibile, elemento non esistente</h4>
+                        <h4 class="text-center p-5">NEW TODO</h4>
 
-
-
+                        <div class="card mx-auto">
+                            <div class="card-body text-center ">
+                                <form class="row g-3" action="index.php" method="POST">
+                                    <div class="col-md-12">
+                                        <label for="inputNewTodo" class="form-label">Nome todo</label>
+                                        <input type="text" class="form-control" id="inputNewTodo" name="inputNewTodo">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label for="inputData" class="form-label">Data todo</label>
+                                        <input type="text" class="form-control" id="inputData" name="inputData" placeholder="YY-MM-DD">
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-outline-success"><i class="fa-solid fa-paper-plane"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             <?php } ?>
-
         <?php } else { ?>
             <!-- SE L'UTENTE NON è LOGGATO VEDRA IL FORM DI LOGIN  -->
-
-
 
             <div class="row">
                 <div class="col d-flex justify-content-end p-0"><img class="w-75" src="./img/twitterlists-TA.webp" alt=""></div>

@@ -29,7 +29,9 @@ if (!empty($_POST['inputUsername']) && !empty($_POST['inputPassword'])) {
 
     header("Location: index.php?subscribe=success");
 } else {
-    echo "campi vuoti";
+    if (isset($_POST['inputUsername']) && isset($_POST['inputPassword'])) {
+        header("Location: subscribe.php?subscribe=failed");
+    }
 }
 
 $connection->close();
@@ -74,6 +76,11 @@ $connection->close();
             </div>
 
             <div class="col d-flex justify-content-start p-0"><img class="w-75" src="./img/twitterlists-TA.webp" alt=""></div>
+        </div>
+        <?php if(isset($_GET['subscribe']) && $_GET['subscribe'] == 'failed') { ?>
+        <div> CAMPI VUOTI</div>
+        <?php }?>
+    </div>
 </body>
 
 </html>
