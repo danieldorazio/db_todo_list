@@ -35,7 +35,7 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
 //query di visualizzazione contenuto per privato per ogni user_id
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
-    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data` FROM `todo_list` WHERE `user_id` = '$user_id'";
+    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data`, `important` FROM `todo_list` WHERE `user_id` = '$user_id'";
     $results = $connection->query($sql);
 }
 
@@ -50,7 +50,7 @@ if (!empty($_GET['inputSearch'])) {
 //query di visualizzazione contenuto per privato per ogni user_id al click del tasto all 
 if (isset($_GET['all']) && $_GET['all'] == 1) {
     $user_id = $_SESSION['user_id'];
-    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data` FROM `todo_list` WHERE `user_id` = '$user_id'";
+    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data`, `important` FROM `todo_list` WHERE `user_id` = '$user_id'";
     $results = $connection->query($sql);
 }
 
@@ -58,7 +58,7 @@ if (isset($_GET['all']) && $_GET['all'] == 1) {
 if (isset($_GET['toDay']) && $_GET['toDay'] == 1) {
     $user_id = $_SESSION['user_id'];
     $time_stamp = date('y-m-d');
-    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data` FROM `todo_list` WHERE `user_id` = '$user_id' AND `data` = '$time_stamp'";
+    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data`, `important` FROM `todo_list` WHERE `user_id` = '$user_id' AND `data` = '$time_stamp'";
     $results = $connection->query($sql);
 }
 
@@ -78,12 +78,32 @@ if (!empty($_POST['inputNewTodo']) && !empty($_POST['inputData'])) {
 if (isset($_POST['delete'])) {
     $delete_id = $_POST['delete'];
 
-    $query_delete = "DELETE FROM todo_list WHERE `todo_list`.`id` = '$delete_id'";
+    $query_delete = "DELETE FROM `todo_list` WHERE `todo_list`.`id` = '$delete_id'";
     $connection->query($query_delete);
 
     header("Location: index.php?deleteTodo=success");
 }
 
+
+// query che mi cambia lo status
+if (isset($_POST['status'])) {
+    $status_id = $_POST['status'];
+
+    $query_status = "UPDATE `todo_list` SET status = NOT status WHERE `id` = '$status_id'";
+    $connection->query($query_status);
+
+    header("Location: index.php");
+}
+
+// query che mi cambia lo important
+if (isset($_POST['important'])) {
+    $important_id = $_POST['important'];
+
+    $query_important = "UPDATE `todo_list` SET important = NOT important WHERE `id` = '$important_id'";
+    $connection->query($query_important);
+
+    header("Location: index.php");
+}
 
 
 $connection->close();
@@ -152,6 +172,21 @@ $connection->close();
                                     <li class="list-group-item list-group-item-action border-0"><?php echo $row['nome_todo'] ?></li>
                                     <div class="d-flex">
                                         <li class="list-group-item list-group-item-action border-0"><?php echo $row['data'] ?></li>
+
+                                        <li class="list-group-item list-group-item-action border-0">
+                                            <form action="index.php" method="POST">
+                                                <input type="hidden" type="text" value="<?php echo $row['id'] ?>" name="status">
+                                                <button type="submit" class="btn btn-outline-danger border-0">status<?php echo $row['status']?></button>
+                                            </form>
+                                        </li>
+
+                                        <li class="list-group-item list-group-item-action border-0">
+                                            <form action="index.php" method="POST">
+                                                <input type="hidden" type="text" value="<?php echo $row['id'] ?>" name="important">
+                                                <button type="submit" class="btn btn-outline-danger border-0">important<?php echo $row['important']?></button>
+                                            </form>
+                                        </li>
+
                                         <li class="list-group-item list-group-item-action border-0">
                                             <form action="index.php" method="POST">
                                                 <input type="hidden" type="text" value="<?php echo $row['id'] ?>" name="delete">
@@ -264,13 +299,6 @@ $connection->close();
 
                 </div>
             </div>
-
-
-
-
-
-
-
         <?php } ?>
     </div>
 </body>
