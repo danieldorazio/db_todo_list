@@ -42,7 +42,7 @@ if (isset($_SESSION['user_id'])) {
 //query di riceca di un todo
 if (!empty($_GET['inputSearch'])) {
     $inputSearch = $_GET['inputSearch'];
-    $sql = "SELECT `nome_todo`,`id`, `data` FROM `todo_list` WHERE `user_id` = '$user_id'
+    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data`, `important` FROM `todo_list` WHERE `user_id` = '$user_id'
     AND `nome_todo` = '$inputSearch'";
     $results = $connection->query($sql);
 }
@@ -57,8 +57,29 @@ if (isset($_GET['all']) && $_GET['all'] == 1) {
 //query di visualizzazione contenuto per privato per ogni user_id del giorno odierno
 if (isset($_GET['toDay']) && $_GET['toDay'] == 1) {
     $user_id = $_SESSION['user_id'];
-    $time_stamp = date('y-m-d');
+    $time_stamp = date('d-m-y');
     $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data`, `important` FROM `todo_list` WHERE `user_id` = '$user_id' AND `data` = '$time_stamp'";
+    $results = $connection->query($sql);
+}
+
+//query di visualizzazione contenuto per privato per ogni user_id dei compiuti
+if (isset($_GET['completed']) && $_GET['completed'] == 1) {
+    $user_id = $_SESSION['user_id'];
+    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data`, `important` FROM `todo_list` WHERE `user_id` = '$user_id' AND `status` = '1'";
+    $results = $connection->query($sql);
+}
+
+//query di visualizzazione contenuto per privato per ogni user_id dei non compiuti
+if (isset($_GET['notCompleted']) && $_GET['notCompleted'] == 1) {
+    $user_id = $_SESSION['user_id'];
+    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data`, `important` FROM `todo_list` WHERE `user_id` = '$user_id' AND `status` = '0'";
+    $results = $connection->query($sql);
+}
+
+//query di visualizzazione contenuto per privato per ogni user_id di tascks importanti
+if (isset($_GET['important']) && $_GET['important'] == 1) {
+    $user_id = $_SESSION['user_id'];
+    $sql = "SELECT `id`, `nome_todo`, `status`, `user_id`, `data`, `important` FROM `todo_list` WHERE `user_id` = '$user_id' AND `important` = '1'";
     $results = $connection->query($sql);
 }
 
@@ -67,7 +88,13 @@ if (isset($_GET['toDay']) && $_GET['toDay'] == 1) {
 if (!empty($_POST['inputNewTodo']) && !empty($_POST['inputData'])) {
     $new_todo = $_POST['inputNewTodo'];
     $new_data = $_POST['inputData'];
-    $query = "INSERT INTO `todo_list` (`id`, `nome_todo`, `status`, `user_id`, `data`) VALUES (NULL, '$new_todo', '0', '$user_id', '$new_data')";
+    if (isset($_POST['inputNewImportant'])) {
+        $new_important = $_POST['inputNewImportant'];
+    } else {
+        $new_important = 0;
+    }
+
+    $query = "INSERT INTO `todo_list` (`id`, `nome_todo`, `status`, `user_id`, `data`, `important`) VALUES (NULL, '$new_todo', '0', '$user_id', '$new_data', '$new_important')";
     $connection->query($query);
 
     header("Location: index.php?newTodo=success");
@@ -129,7 +156,7 @@ $connection->close();
         <?php if (!empty($_SESSION['user_id']) && !empty($_SESSION['username'])) { ?>
             <?php if ($results && $results->num_rows > 0) { ?>
                 <div class="row">
-                    <div class="col bg-light">
+                    <div class="col-lg-3 col-md-9 bg-light">
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="text-center p-5">Ciao <?php echo $_SESSION['username']; ?></h4>
 
@@ -140,6 +167,7 @@ $connection->close();
                             </form>
                         </div>
 
+                        <!-- LISTA FILTRI -->
                         <form class="d-flex border border-3 rounded-pill mb-5 " action="index.php" method="GET">
                             <label for="search"></label>
                             <input type="text" class="form-control border-0" id="inputSearch" name="inputSearch" placeholder="SEARCH TASK">
@@ -158,35 +186,61 @@ $connection->close();
                                     <button type="submit" class="btn border-0 "><i class="fa-regular fa-sun btn btn-outline-secondary border-0 "></i> <span class="ms-3">Today's Tasks</span></button>
                                 </form>
                             </li>
+                            <li class="list-group-item list-group-item-action border-0">
+                                <form action="index.php" method="GET">
+                                    <input type="hidden" type="text" value="1" name="completed">
+                                    <button type="submit" class="btn border-0 "><i class="fa-regular text-success fa-circle-check btn btn-outline-secondary border-0"></i> <span class="ms-3">Tasks Completed</span></button>
+                                </form>
+                            </li>
+                            <li class="list-group-item list-group-item-action border-0">
+                                <form action="index.php" method="GET">
+                                    <input type="hidden" type="text" value="1" name="notCompleted">
+                                    <button type="submit" class="btn border-0 "><i class="fa-regular text-success fa-circle btn btn-outline-secondary border-0"></i> <span class="ms-3">Tasks Not Completed</span></button>
+                                </form>
+                            </li>
+                            <li class="list-group-item list-group-item-action border-0">
+                                <form action="index.php" method="GET">
+                                    <input type="hidden" type="text" value="1" name="important">
+                                    <button type="submit" class="btn border-0 "><i class="fa-star text-primary fa-solid btn btn-outline-secondary border-0"></i> <span class="ms-3">Important</span></button>
+                                </form>
+                            </li>
+
                         </ul>
 
                     </div>
 
-                    <div class="col bg-secondary">
+                    <div class="col-lg-6 col-md-9 bg-secondary">
                         <h4 class="text-center p-5">TODO LIST</h4>
                         <tbody>
                             <!-- ciclo while per mostare tutta la tabella  -->
                             <ul class="text-center  list-group">
                                 <?php while ($row = $results->fetch_assoc()) { ?>
-
-                                    <li class="list-group-item list-group-item-action border-0"><?php echo $row['nome_todo'] ?></li>
                                     <div class="d-flex">
-                                        <li class="list-group-item list-group-item-action border-0"><?php echo $row['data'] ?></li>
-
-                                        <li class="list-group-item list-group-item-action border-0">
+                                        <li class="list-group-item list-group-item-action border-0" style="width:fit-content;">
                                             <form action="index.php" method="POST">
                                                 <input type="hidden" type="text" value="<?php echo $row['id'] ?>" name="status">
-                                                <button type="submit" class="btn btn-outline-danger border-0">status<?php echo $row['status']?></button>
+                                                <button type="submit" class="btn p-0 border-0"><i class="fa-regular text-success <?php if ($row['status'] == 0) {
+                                                                                                                                        echo "fa-circle";
+                                                                                                                                    } else {
+                                                                                                                                        echo "fa-circle-check";
+                                                                                                                                    } ?>"></i></button>
                                             </form>
                                         </li>
-
-                                        <li class="list-group-item list-group-item-action border-0">
+                                        <li class="list-group-item list-group-item-action border-0"><?php echo $row['nome_todo'] ?></li>
+                                        <li class="list-group-item list-group-item-action border-0 w-50 ps-0 pe-0"><?php echo $row['data'] ?></li>
+                                        <li class="list-group-item list-group-item-action border-0" style="width:fit-content;">
                                             <form action="index.php" method="POST">
                                                 <input type="hidden" type="text" value="<?php echo $row['id'] ?>" name="important">
-                                                <button type="submit" class="btn btn-outline-danger border-0">important<?php echo $row['important']?></button>
+                                                <button type="submit" class="btn p-0 border-0"><i class="fa-star text-primary <?php if ($row['important'] == 0) {
+                                                                                                                                    echo "fa-regular";
+                                                                                                                                } else {
+                                                                                                                                    echo "fa-solid";
+                                                                                                                                } ?>"></i></button>
                                             </form>
                                         </li>
+                                    </div>
 
+                                    <div class="d-flex">
                                         <li class="list-group-item list-group-item-action border-0">
                                             <form action="index.php" method="POST">
                                                 <input type="hidden" type="text" value="<?php echo $row['id'] ?>" name="delete">
@@ -198,20 +252,27 @@ $connection->close();
                             </ul>
                     </div>
 
-                    <div class="col bg-light">
+                    <div class="col-lg-3 col-md-9 bg-light">
                         <h4 class="text-center p-5">NEW TODO</h4>
 
                         <div class="card mx-auto">
                             <div class="card-body text-center ">
                                 <form class="row g-3" action="index.php" method="POST">
+
+                                    <div class="col-md-12">
+                                        <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off" value="1" name="inputNewImportant">
+                                        <label class="btn btn-outline-primary" for="btn-check-outlined">Important</label><br>
+                                    </div>
+
                                     <div class="col-md-12">
                                         <label for="inputNewTodo" class="form-label">Nome todo</label>
                                         <input type="text" class="form-control" id="inputNewTodo" name="inputNewTodo">
                                     </div>
                                     <div class="col-md-12">
                                         <label for="inputData" class="form-label">Data todo</label>
-                                        <input type="text" class="form-control" id="inputData" name="inputData" placeholder="YY-MM-DD">
+                                        <input type="text" class="form-control" id="inputData" name="inputData" placeholder="DD-MM-YY">
                                     </div>
+
                                     <div class="col-12">
                                         <button type="submit" class="btn btn-outline-success"><i class="fa-solid fa-paper-plane"></i></button>
                                     </div>
@@ -251,13 +312,17 @@ $connection->close();
                         <div class="card mx-auto">
                             <div class="card-body text-center ">
                                 <form class="row g-3" action="index.php" method="POST">
+                                <div class="col-md-12">
+                                        <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off" value="1" name="inputNewImportant">
+                                        <label class="btn btn-outline-primary" for="btn-check-outlined">Important</label><br>
+                                    </div>
                                     <div class="col-md-12">
                                         <label for="inputNewTodo" class="form-label">Nome todo</label>
                                         <input type="text" class="form-control" id="inputNewTodo" name="inputNewTodo">
                                     </div>
                                     <div class="col-md-12">
                                         <label for="inputData" class="form-label">Data todo</label>
-                                        <input type="text" class="form-control" id="inputData" name="inputData" placeholder="YY-MM-DD">
+                                        <input type="text" class="form-control" id="inputData" name="inputData" placeholder="DD-MM-YY">
                                     </div>
                                     <div class="col-12">
                                         <button type="submit" class="btn btn-outline-success"><i class="fa-solid fa-paper-plane"></i></button>
