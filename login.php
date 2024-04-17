@@ -7,7 +7,8 @@ function login($username, $password, $connection) {
     $hashed_passwd = md5($password);
 
     $stmt = $connection->prepare("SELECT* FROM `users` WHERE `username` = ? AND `password` = ?");
-    $stmt->bind_param('ss', $username, $hashed_passwd);
+    $stmt->bind_param('ss', $username, $hashed_passwd);    
+    // bindParam()  per mysql
     $stmt->execute();
 
     $results = $stmt->get_result();
